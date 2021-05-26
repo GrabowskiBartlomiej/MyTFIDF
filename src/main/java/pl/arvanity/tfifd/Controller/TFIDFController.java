@@ -21,37 +21,37 @@ public class TFIDFController {
     }
 
     @GetMapping
-    public String homepage(HttpServletRequest req){
+    public String homepage(HttpServletRequest req) {
         req.getSession().setAttribute("freq", null);
         return "index";
     }
 
     @GetMapping("about")
-    public String about(HttpServletRequest req){
+    public String about(HttpServletRequest req) {
         req.getSession().setAttribute("freq", null);
         return "about";
     }
 
     @GetMapping("calculator")
-    public String calculator(Model model, HttpServletRequest req){
+    public String calculator(Model model, HttpServletRequest req) {
         req.getSession().setAttribute("freq", null);
         model.addAttribute("search", new Search());
         return "form";
     }
 
     @PostMapping("calculator")
-    public String calculatorForm(@ModelAttribute Search search, HttpServletRequest req){
+    public String calculatorForm(@ModelAttribute Search search, HttpServletRequest req) {
         tfidfService.calculate(search, req);
         return "redirect:/frequency";
     }
 
     @GetMapping("frequency")
-    public String frequency(){
+    public String frequency() {
         return "frequency";
     }
 
     @GetMapping("file")
-    public String fileForm(){
+    public String fileForm() {
         return "fileForm";
     }
 
@@ -62,7 +62,7 @@ public class TFIDFController {
     }
 
     @GetMapping("save")
-    public String saveInFile(HttpServletRequest req){
+    public String saveInFile(HttpServletRequest req) {
         tfidfService.saveInFile(req);
         return "redirect:/frequency";
     }

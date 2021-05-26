@@ -7,7 +7,8 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>TFIDF Calculator</title>
     <link rel="stylesheet" href="<c:url value="../../resources/css/style.css"/>"/>
@@ -30,9 +31,11 @@
 
 <h2>Frequency</h2>
 <ul style="font-size: 23px; display: block; margin: auto; width: 50%">
-<c:forEach items="${freq}" var="f">
-    <li>{${f.sequence}, ${f.documentsWordLength}} = ${f.freq2} (${f.searchedLettersTotalMatches}/${f.searchedWordTotalMatchesInDocument})</li>
-</c:forEach>
+    <c:forEach items="${freq}" var="f">
+        <li>{${f.sequence}, ${f.documentsWordLength}} = ${f.freq2}
+            (${f.searchedLettersTotalMatches}/${f.searchedWordTotalMatchesInDocument})
+        </li>
+    </c:forEach>
     <li>${result}</li>
 </ul>
 </body>

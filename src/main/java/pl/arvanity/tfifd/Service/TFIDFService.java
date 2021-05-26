@@ -107,7 +107,7 @@ public class TFIDFService {
         String word = search.getWordToSearch();
         List<Frequency> tfidf = new ArrayList<>();
 
-        List<String > doc = clearSpecials(str);
+        List<String> doc = clearSpecials(str);
 
         int searchedWordTotalMatchesInDocument = countPresence(word, doc);
 
@@ -115,8 +115,8 @@ public class TFIDFService {
 
         char[] arrayWord = word.toLowerCase().toCharArray();
 
-        for(List<String> text : sorted){
-            for(String sample : text){
+        for (List<String> text : sorted) {
+            for (String sample : text) {
                 tfidf.add(calculateFrequency(sample.toLowerCase(), arrayWord, searchedWordTotalMatchesInDocument));
             }
         }
@@ -137,21 +137,21 @@ public class TFIDFService {
         List<String> result = new ArrayList<>();
         String summary = "";
 
-        for(Frequency t : tfidf){
+        for (Frequency t : tfidf) {
             System.out.println(t);
             result.add(t.toString());
             totalMatches += t.getSearchedLettersTotalMatches();
         }
 
-        for(String str : doc){
+        for (String str : doc) {
             allCharacters += str.length();
         }
 
-        totalFreq = (float) totalMatches/allCharacters;
+        totalFreq = (float) totalMatches / allCharacters;
         DecimalFormat df = new DecimalFormat();
         df.setMaximumFractionDigits(2);
         df.setRoundingMode(RoundingMode.CEILING);
-        String freq =  (df.format(totalFreq));
+        String freq = (df.format(totalFreq));
         summary = "TOTAL Frequency: " + freq + " " + "(" + totalMatches + "/" + allCharacters + ")";
         result.add(summary);
 
@@ -169,12 +169,12 @@ public class TFIDFService {
         List<Frequency> freq = (List<Frequency>) req.getSession().getAttribute("freq");
         String result = (String) req.getSession().getAttribute("result");
 
-        try(PrintWriter writer = new PrintWriter(new FileWriter("output.txt"))) {
-           for(Frequency f : freq){
-               writer.append(f.toString()+"\n");
-           }
-           writer.append(result);
-        } catch(Exception e) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter("output.txt"))) {
+            for (Frequency f : freq) {
+                writer.append(f.toString() + "\n");
+            }
+            writer.append(result);
+        } catch (Exception e) {
             e.getStackTrace();
         }
     }

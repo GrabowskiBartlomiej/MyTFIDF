@@ -72,8 +72,8 @@ public class Frequency {
     public String toString() {
         DecimalFormat df = new DecimalFormat();
         df.setMaximumFractionDigits(2);
-        String freq =  (df.format(frequency));
+        String freq = (df.format(frequency));
         this.freq2 = freq;
-        return "{" + sequence + ", " + documentsWordLength +"} = " + freq + " (" + searchedLettersTotalMatches + "/" + searchedWordTotalMatchesInDocument + ")";
+        return "{" + sequence + ", " + documentsWordLength + "} = " + freq + " (" + searchedLettersTotalMatches + "/" + searchedWordTotalMatchesInDocument + ")";
     }
 }
