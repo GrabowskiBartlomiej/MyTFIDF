@@ -11,14 +11,32 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class TFIDFService {
+
+
+    public void calculateTfidf(Search search, HttpServletRequest req) {
+        String document = search.getDocument().toLowerCase(Locale.ROOT);
+        String wordToSearch = search.getWordToSearch().toLowerCase(Locale.ROOT);
+        List<Frequency> tfidf = new ArrayList<>();
+        char[] lettersToSearch = wordToSearch.toCharArray();
+
+        List<String> wordsFromDocumentWithoutSpecials = clearSpecials(document);
+        int totalOccurrencesOfSearchedWordInDocument = totalOccurrencesOfSearchedWordInDocument(lettersToSearch, document);
+
+        for (String singleWordFromDocument : wordsFromDocumentWithoutSpecials) {
+            tfidf.add(calculateFrequency(singleWordFromDocument, lettersToSearch, totalOccurrencesOfSearchedWordInDocument));
+        }
+
+        tfidf.removeIf(f -> f.getSearchedLettersTotalMatches() == 0);
+        tfidf.sort(Comparator.comparing(Frequency::getFrequency));
+
+        displayResult(tfidf, wordsFromDocumentWithoutSpecials, req);
+    }
+
 
     public static List<String> clearSpecials(String doc) {
         String spec = "[^a-zA-Z0-9]";
@@ -31,63 +49,31 @@ public class TFIDFService {
     }
 
 
-    public static int countPresence(String searchedWord, List<String> docs) {
-        int occurrences = 0;
-        char[] letters = searchedWord.toCharArray();
-
-        for (String doc : docs) {
-            char[] docLetters = doc.toCharArray();
-
-            for (char docLetter : docLetters) {
-
-                for (char letter : letters) {
-                    if (String.valueOf(letter).equalsIgnoreCase(String.valueOf(docLetter))) {
-                        occurrences++;
-                    }
+    public int totalOccurrencesOfSearchedWordInDocument(char[] lettersToSearch, String document) {
+        int totalOccurrencesOfSearchedWordInDocument = 0;
+        for (int i = 0; i < document.length(); i++) {
+            for (char letter : lettersToSearch) {
+                if (document.charAt(i) == letter) {
+                    totalOccurrencesOfSearchedWordInDocument++;
+                    break;
                 }
             }
         }
-        return occurrences;
+        return totalOccurrencesOfSearchedWordInDocument;
     }
 
 
-    public static List<List<String>> getWordsSortedByLength(List<String> doc) {
-        List<List<String>> wordsSortedByLength = new ArrayList<>();
-        List<String> temp = new ArrayList<>();
-        int currLength = -1;
-
-        doc.sort(Comparator.comparingInt(String::length));
-
-        for (int i = 0; i < doc.size(); i++) {
-            if (currLength == doc.get(i).length()) {
-                temp.add(doc.get(i));
-            } else {
-                if (!temp.isEmpty()) {
-                    wordsSortedByLength.add(temp);
-                    temp = new ArrayList<>();
-                }
-                currLength = doc.get(i).length();
-                temp.add(doc.get(i));
-            }
-        }
-        wordsSortedByLength.add(temp);
-
-        return wordsSortedByLength;
-    }
-
-
-    public static Frequency calculateFrequency(String docsWord, char[] searchedWord, int searchedWordTotalMatchesInDocument) {
+    public Frequency calculateFrequency(String singleWordFromDocument, char[] lettersToSearch, int totalOccurrencesOfSearchedWordInDocument) {
         int totalMatches = 0;
         boolean appears = false;
         float frequency;
         List<String> sequence = new ArrayList<>();
 
-        for (int i = 0; i < docsWord.length(); i++) {
+        for (int i = 0; i < singleWordFromDocument.length(); i++) {
             appears = false;
-
-            for (char c : searchedWord) {
-                if (c == docsWord.charAt(i)) {
-                    sequence.add(String.valueOf(c));
+            for (char letter : lettersToSearch) {
+                if (letter == singleWordFromDocument.charAt(i)) {
+                    sequence.add(String.valueOf(letter));
                     appears = true;
                     totalMatches++;
                     break;
@@ -95,42 +81,15 @@ public class TFIDFService {
             }
         }
 
-        frequency = (float) totalMatches / searchedWordTotalMatchesInDocument;
+        frequency = (float) totalMatches / totalOccurrencesOfSearchedWordInDocument;
         sequence = sequence.stream().distinct().collect(Collectors.toList());
-        Frequency f = new Frequency(sequence, frequency, totalMatches, docsWord.length(), searchedWordTotalMatchesInDocument);
+        Frequency singleFrequency = new Frequency(sequence, frequency, totalMatches, singleWordFromDocument.length(), totalOccurrencesOfSearchedWordInDocument);
 
-        return f;
-    }
-
-    public void calculate(Search search, HttpServletRequest req) {
-        String str = search.getDocument();
-        String word = search.getWordToSearch();
-        List<Frequency> tfidf = new ArrayList<>();
-
-        List<String> doc = clearSpecials(str);
-
-        int searchedWordTotalMatchesInDocument = countPresence(word, doc);
-
-        List<List<String>> sorted = getWordsSortedByLength(doc);
-
-        char[] arrayWord = word.toLowerCase().toCharArray();
-
-        for (List<String> text : sorted) {
-            for (String sample : text) {
-                tfidf.add(calculateFrequency(sample.toLowerCase(), arrayWord, searchedWordTotalMatchesInDocument));
-            }
-        }
-
-        tfidf.sort(Comparator.comparing(Frequency::getFrequency));
-
-        tfidf.removeIf(f -> f.getSearchedLettersTotalMatches() == 0);
-
-        displayResult(tfidf, doc, req);
-
+        return singleFrequency;
     }
 
 
-    private static void displayResult(List<Frequency> tfidf, List<String> doc, HttpServletRequest req) {
+    private static void displayResult(List<Frequency> tfidf, List<String> wordsFromDocumentWithoutSpecials, HttpServletRequest req) {
         int allCharacters = 0;
         int totalMatches = 0;
         float totalFreq;
@@ -138,13 +97,12 @@ public class TFIDFService {
         String summary = "";
 
         for (Frequency t : tfidf) {
-            System.out.println(t);
             result.add(t.toString());
             totalMatches += t.getSearchedLettersTotalMatches();
         }
 
-        for (String str : doc) {
-            allCharacters += str.length();
+        for (String word : wordsFromDocumentWithoutSpecials) {
+            allCharacters += word.length();
         }
 
         totalFreq = (float) totalMatches / allCharacters;
@@ -159,13 +117,15 @@ public class TFIDFService {
         req.getSession().setAttribute("result", summary);
     }
 
-    public void transform(MultipartFile file, String wordToSearch, HttpServletRequest req) throws IOException {
-        String content = new String(file.getBytes());
-        Search search = new Search(wordToSearch, content);
-        calculate(search, req);
+
+    public void transformFileInString(MultipartFile file, String wordToSearch, HttpServletRequest req) throws IOException {
+        String document = new String(file.getBytes());
+        Search search = new Search(wordToSearch, document);
+        calculateTfidf(search, req);
     }
 
-    public void saveInFile(HttpServletRequest req) {
+
+    public void saveResultInFile(HttpServletRequest req) {
         List<Frequency> freq = (List<Frequency>) req.getSession().getAttribute("freq");
         String result = (String) req.getSession().getAttribute("result");
 
@@ -178,4 +138,5 @@ public class TFIDFService {
             e.getStackTrace();
         }
     }
+
 }

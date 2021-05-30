@@ -41,13 +41,13 @@ public class TFIDFController {
 
     @PostMapping("calculator")
     public String calculatorForm(@ModelAttribute Search search, HttpServletRequest req) {
-        tfidfService.calculate(search, req);
-        return "redirect:/frequency";
+        tfidfService.calculateTfidf(search, req);
+        return "redirect:/result";
     }
 
-    @GetMapping("frequency")
+    @GetMapping("result")
     public String frequency() {
-        return "frequency";
+        return "result";
     }
 
     @GetMapping("file")
@@ -57,13 +57,13 @@ public class TFIDFController {
 
     @PostMapping("file")
     public String fileFormSuccess(@RequestParam MultipartFile file, @RequestParam String wordToSearch, HttpServletRequest req) throws IOException {
-        tfidfService.transform(file, wordToSearch, req);
-        return "redirect:/frequency";
+        tfidfService.transformFileInString(file, wordToSearch, req);
+        return "redirect:/result";
     }
 
     @GetMapping("save")
     public String saveInFile(HttpServletRequest req) {
-        tfidfService.saveInFile(req);
-        return "redirect:/frequency";
+        tfidfService.saveResultInFile(req);
+        return "redirect:/result";
     }
 }

@@ -29,11 +29,4 @@ public class Search {
         this.document = document;
     }
 
-    @Override
-    public String toString() {
-        return "Search{" +
-                "wordToSearch='" + wordToSearch + '\'' +
-                ", document='" + document + '\'' +
-                '}';
-    }
 }
