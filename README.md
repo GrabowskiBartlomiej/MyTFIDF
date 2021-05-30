@@ -1,7 +1,7 @@
 # MyTFIDF
 Simple TFIDF App
 
-Web app allowing to:
+Web app with following functions:
 
 * working TFIDF Calculator,
 * Possibility to input documents as text or file,
